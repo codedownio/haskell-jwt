@@ -329,10 +329,11 @@ verify secret' (Unverified header'@(JWTHeader {alg=(Just HS256)}) claims' unveri
     let calculatedSignature = Signature $ calculateDigest HS256 secret' originalClaim
     guard (unverifiedSignature == calculatedSignature)
     pure $ Verified header' claims' calculatedSignature
-verify (RSASecret publicKey) (Unverified header'@(JWTHeader {alg=(Just RS256)}) claims' sig@(Signature unverifiedSig) originalClaim) = case RSA.rsassa_pkcs1_v1_5_verify RSA.hashSHA256 publicKey (convert originalClaim) (convert $ BASE64.decodeLenient $ convert unverifiedSig) of
-  Left _ -> Nothing
-  Right False -> Nothing
-  Right True -> Just $ Verified header' claims' sig
+verify (RSASecret publicKey) (Unverified header'@(JWTHeader {alg=(Just RS256)}) claims' sig@(Signature unverifiedSig) originalClaim) =
+  case RSA.rsassa_pkcs1_v1_5_verify RSA.hashSHA256 publicKey (convert originalClaim) (convert $ BASE64.decodeLenient $ convert unverifiedSig) of
+    Left _ -> Nothing
+    Right False -> Nothing
+    Right True -> Just $ Verified header' claims' sig
 verify _ _ = Nothing
 
 -- | Decode a claims set and verify that the signature matches by using the supplied secret.
